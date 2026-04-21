@@ -1,0 +1,912 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1a0b1c">
+    <title>إدارة طرزان VIP | النسخة الملكية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* الألوان النسائية الفخمة */
+            --primary: #f43f5e;       /* Rose 500 */
+            --primary-glow: rgba(244, 63, 94, 0.6);
+            --secondary: #d946ef;     /* Fuchsia 500 */
+            --dark-bg: #1a0b1c;       /* Deep Plum / Dark Violet */
+            --glass: rgba(35, 15, 40, 0.65);
+            --glass-border: rgba(255, 192, 203, 0.15); /* Soft pink border */
+        }
+        
+        body, html {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(244, 63, 94, 0.15), transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(217, 70, 239, 0.15), transparent 40%);
+            color: white;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* لمنع اهتزاز المتصفح */
+            position: fixed; /* لحل مشكلة اختفاء الأزرار السفلية */
+        }
+
+        /* حاوية التطبيق الفخمة */
+        .app-wrapper {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            overflow: hidden;
+            z-index: 10; /* فوق تأثيرات المطر والورود */
+        }
+
+        @media (min-width: 768px) {
+            body { background-size: cover; position: relative; display: flex; justify-content: center; align-items: center; }
+            .app-wrapper {
+                position: relative;
+                width: 420px;
+                height: 85vh;
+                max-height: 880px;
+                border-radius: 3rem;
+                border: 1px solid var(--glass-border);
+                box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 0 0 0 10px rgba(244, 63, 94, 0.03);
+            }
+            .bottom-nav { border-radius: 0 0 3rem 3rem; }
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 1.5rem;
+            padding-bottom: calc(90px + env(safe-area-inset-bottom));
+            scrollbar-width: none;
+        }
+        .content-area::-webkit-scrollbar { display: none; }
+
+        /* البطاقات الزجاجية الوردية */
+        .glass-card {
+            background: rgba(45, 20, 50, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.8rem;
+            box-shadow: inset 0 1px 1px rgba(255, 200, 220, 0.1), 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* شريط التنقل السفلي */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(75px + env(safe-area-inset-bottom));
+            background: rgba(25, 10, 30, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(244, 63, 94, 0.15);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
+            z-index: 100;
+        }
+
+        .nav-item {
+            color: #83708a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 33.33%;
+            height: 100%;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .nav-item i {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+            transition: all 0.4s ease;
+        }
+
+        .nav-item.active { color: white; }
+        .nav-item.active i {
+            color: var(--primary);
+            transform: translateY(-5px) scale(1.15);
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
+        
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 12px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--primary);
+            opacity: 0;
+            transition: all 0.3s ease;
+            transform: translateY(10px);
+        }
+        .nav-item.active::after {
+            opacity: 1;
+            transform: translateY(0);
+            box-shadow: 0 0 12px var(--primary);
+        }
+
+        .page-section {
+            display: none;
+            animation: fadeInScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .page-section.active { display: block; }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* حقول الإدخال */
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-group i {
+            position: absolute;
+            right: 1.2rem;
+            color: #a890b3;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        .input-vip {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            border-radius: 1.4rem;
+            padding: 1.2rem 1.2rem 1.2rem 2.5rem;
+            padding-right: 3rem;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .input-vip:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: inset 0 0 0 1px var(--primary), 0 0 20px rgba(244, 63, 94, 0.2);
+            background: rgba(0, 0, 0, 0.6);
+        }
+        .input-vip:focus + i { color: var(--primary); }
+
+        /* الأزرار الفخمة */
+        .btn-action {
+            background: linear-gradient(135deg, #f43f5e, #be123c); /* Rose Gradient */
+            color: white;
+            font-weight: 800;
+            border-radius: 1.4rem;
+            padding: 1.2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            box-shadow: 0 8px 25px -5px rgba(244, 63, 94, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-action:active { transform: scale(0.94); }
+        .btn-qr { background: linear-gradient(135deg, #d946ef, #9333ea); box-shadow: 0 8px 25px -5px rgba(217, 70, 239, 0.5); }
+        .btn-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); box-shadow: 0 8px 25px -5px rgba(168, 85, 247, 0.5); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #991b1b); box-shadow: 0 8px 25px -5px rgba(239, 68, 68, 0.5); }
+
+        /* زر النسخ الجديد */
+        .btn-copy {
+            background: rgba(244, 63, 94, 0.15);
+            color: #fda4af;
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            border-radius: 1rem;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .btn-copy:active { background: rgba(244, 63, 94, 0.4); transform: scale(0.95); }
+
+        /* زر التبديل iOS Style الوردية */
+        .toggle-switch {
+            position: relative;
+            width: 54px;
+            height: 32px;
+            appearance: none;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.4s;
+            border: 2px solid rgba(255,255,255,0.08);
+        }
+        .toggle-switch:checked {
+            background: var(--primary);
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.5);
+            border-color: var(--primary);
+        }
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            top: 2px;
+            left: 3px;
+            background: white;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .toggle-switch:checked::before { left: calc(100% - 27px); }
+
+        .toast-msg {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(25, 10, 30, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            z-index: 999;
+            transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            width: max-content;
+            max-width: 90%;
+        }
+        .toast-msg.show { top: max(20px, env(safe-area-inset-top)); }
+        .toast-msg.error { border-color: #ef4444; }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(244, 63, 94, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ========================================= */
+        /* تأثيرات الطقس (أمطار ورياح وورود) */
+        /* ========================================= */
+        #weather-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; /* خلف التطبيق مباشرة */
+            pointer-events: none;
+            overflow: hidden;
+        }
+        /* الأمطار المائلة بفعل الرياح */
+        .raindrop {
+            position: absolute;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,192,203,0.6));
+            width: 2px;
+            height: 60px;
+            border-radius: 50%;
+            animation: rain linear infinite;
+        }
+        @keyframes rain {
+            0% { transform: translateY(-100px) translateX(0) rotate(20deg); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(120vh) translateX(-200px) rotate(20deg); opacity: 0; }
+        }
+        /* بتلات الورد المتساقطة والمائلة */
+        .petal {
+            position: absolute;
+            background-color: #f472b6; /* زهري */
+            border-radius: 15px 0 15px 0;
+            box-shadow: 0 0 10px rgba(244,114,182,0.6);
+            opacity: 0.8;
+            animation: fall linear infinite, sway ease-in-out infinite alternate;
+        }
+        .petal.dark { background-color: #d946ef; border-radius: 0 15px 0 15px; }
+        @keyframes fall {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+        @keyframes sway {
+            0% { transform: translateX(0) rotate(0deg) scale(0.8); }
+            100% { transform: translateX(-80px) rotate(60deg) scale(1.1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- حاوية التأثيرات (الورود والمطر) -->
+    <div id="weather-canvas"></div>
+
+    <!-- التنبيهات العائمة -->
+    <div id="toast" class="toast-msg">
+        <i class="fa-solid fa-circle-check text-rose-400 text-xl"></i>
+        <span id="toastText">تمت العملية بنجاح</span>
+    </div>
+
+    <div class="app-wrapper">
+        
+        <!-- الترويسة العلوية -->
+        <div class="pt-10 pb-4 px-6 text-center z-10 relative">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent -z-10"></div>
+            <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-fuchsia-300 tracking-wider drop-shadow-lg">
+                طرزان VIP
+            </h1>
+            <p class="text-[0.70rem] text-rose-400/80 mt-1 font-bold tracking-[0.3em] uppercase">Premium Royal Edition</p>
+        </div>
+
+        <div class="content-area">
+
+            <!-- ==================== PAGE 1: HOME ==================== -->
+            <section id="page-home" class="page-section active">
+                <div class="glass-card p-6 text-center mb-6">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-rose-500 rounded-full blur-[60px] opacity-30"></div>
+                    <div class="relative inline-block mb-4">
+                        <img src="https://b.top4top.io/p_3489wk62d0.jpg" alt="Tarzan" class="w-28 h-28 rounded-full border-[3px] border-rose-400/50 object-cover shadow-[0_0_30px_rgba(244,63,94,0.4)] z-10 relative">
+                        <div class="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-tr from-rose-500 to-fuchsia-500 rounded-full border-[3px] border-[#2d1432] flex items-center justify-center text-white text-xs z-20 shadow-lg">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-black mb-1">الذكاء الاصطناعي</h2>
+                    <p class="text-sm text-rose-200/60 font-semibold">جاهز لتنفيذ الأوامر والحماية بحب 💖</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="glass-card p-5 flex flex-col items-center justify-center text-center cursor-pointer active:scale-95 transition border-b-2 border-rose-500/50" onclick="switchPage('page-connect')">
+                        <div class="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-2xl mb-3 border border-rose-500/20 shadow-inner">
+                            <i class="fa-solid fa-plug-circle-plus"></i>
+                        </div>
+                        <h3 class="font-bold text-sm">ربط حساب</h3>
+                    </div>
+                    
+                    <div class="glass-card p-5 flex flex-col items-center justify-center text-center cursor-pointer active:scale-95 transition border-b-2 border-fuchsia-500/50" onclick="switchPage('page-settings')">
+                        <div class="w-14 h-14 rounded-2xl bg-fuchsia-500/10 text-fuchsia-400 flex items-center justify-center text-2xl mb-3 border border-fuchsia-500/20 shadow-inner">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <h3 class="font-bold text-sm">التحكم بالجلسة</h3>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 flex items-center gap-4 border-r-4 border-r-rose-500">
+                    <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-400">
+                        <i class="fa-solid fa-shield-heart text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm">حماية الخصوصية</h4>
+                        <p class="text-xs text-rose-200/50 mt-1">نظام منع الحذف الفوري مفعل تلقائياً</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== PAGE 2: CONNECT ==================== -->
+            <section id="page-connect" class="page-section">
+                <div class="glass-card p-6 mb-5 border-t-2 border-rose-500/30">
+                    <h2 class="text-xl font-black mb-5 flex items-center gap-2 text-rose-400 border-b border-rose-500/20 pb-3">
+                        <i class="fa-solid fa-link"></i> ربط الجلسة
+                    </h2>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-bold text-rose-200/70 mb-2 pl-2">اسم الجلسة (إنجليزي فقط)</label>
+                            <div class="input-group">
+                                <input type="text" id="sessionId" placeholder="مثال: my_bot1" class="input-vip">
+                                <i class="fa-solid fa-id-badge"></i>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-rose-200/70 mb-2 pl-2">رقم الواتساب (للاقتران)</label>
+                            <div class="input-group">
+                                <input type="number" id="phoneNumber" placeholder="مثال: 966500000000" class="input-vip text-left" dir="ltr">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 pt-3">
+                            <button onclick="requestPairCode()" class="btn-action flex-1">
+                                <i class="fa-solid fa-key text-lg"></i> كود اقتران
+                            </button>
+                            <button onclick="createSessionQR()" class="btn-action btn-qr flex-1">
+                                <i class="fa-solid fa-qrcode text-lg"></i> باركود
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="displayArea" class="glass-card p-8 text-center hidden min-h-[200px] flex-col justify-center border-rose-500/30 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-50"></div>
+                    
+                    <div id="loading" class="hidden flex-col items-center">
+                        <div class="spinner mb-5"></div>
+                        <p class="text-sm font-bold text-rose-400 animate-pulse">جاري الاتصال بخوادم WhatsApp...</p>
+                    </div>
+
+                    <div id="codeResult" class="hidden flex-col items-center w-full">
+                        <p class="text-[0.7rem] text-rose-400 font-bold uppercase tracking-widest mb-3">كود الاقتران الخاص بك</p>
+                        <div class="bg-black/60 border border-rose-500/40 rounded-2xl p-5 mb-2 w-full shadow-[inset_0_0_20px_rgba(244,63,94,0.15)] relative">
+                            <h1 id="theCode" class="text-4xl font-black text-white tracking-[0.4em] select-all font-mono drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" dir="ltr">XXXX</h1>
+                        </div>
+                        
+                        <!-- زر النسخ الفخم -->
+                        <button onclick="copyCode()" class="btn-copy mb-4">
+                            <i class="fa-regular fa-copy"></i> نسخ الكود
+                        </button>
+
+                        <p class="text-xs text-rose-200/70 font-semibold bg-[rgba(35,15,40,0.8)] p-3 rounded-xl border border-rose-500/20 w-full">
+                            سيصلك إشعار من واتساب الآن، أدخل الكود أعلاه.
+                        </p>
+                    </div>
+
+                    <div id="qrResult" class="hidden flex-col items-center w-full">
+                        <div class="bg-white p-3 rounded-3xl mb-3 shadow-[0_10px_30px_rgba(217,70,239,0.3)] border-4 border-fuchsia-200/20">
+                            <img id="theQr" src="" alt="QR" class="w-40 h-40 rounded-2xl">
+                        </div>
+                        <p class="text-xs text-fuchsia-300 font-bold">امسح الرمز بواسطة واتساب</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== PAGE 3: SETTINGS ==================== -->
+            <section id="page-settings" class="page-section">
+                <div class="glass-card p-5 mb-5 border-t-2 border-fuchsia-500/30">
+                    <div class="flex justify-between items-center mb-4 border-b border-fuchsia-500/20 pb-3">
+                        <h2 class="text-xl font-black flex items-center gap-2 text-fuchsia-400">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> إعدادات البوت
+                        </h2>
+                        <button onclick="fetchSessions()" class="w-10 h-10 rounded-full bg-[rgba(0,0,0,0.3)] text-fuchsia-300 hover:text-white flex items-center justify-center active:scale-90 transition border border-fuchsia-500/20 shadow-inner">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                    
+                    <select id="activeSessions" onchange="showAuthPanel()" class="input-vip text-center font-bold appearance-none bg-[rgba(20,5,25,0.8)] border-fuchsia-500/40 text-lg mb-2">
+                        <option value="">-- اختر الجلسة --</option>
+                    </select>
+                </div>
+
+                <!-- شاشة إدخال كلمة المرور (القفل) -->
+                <div id="authPanel" class="hidden glass-card p-6 text-center border-rose-500/20 relative overflow-hidden">
+                    <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-rose-500 rounded-full blur-[50px] opacity-20"></div>
+                    <div class="w-16 h-16 bg-[rgba(0,0,0,0.4)] rounded-full mx-auto flex items-center justify-center text-2xl text-rose-400 mb-4 shadow-inner border border-rose-500/30">
+                        <i class="fa-solid fa-lock-heart"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">جلسة محمية 🔒</h3>
+                    <p class="text-xs text-rose-200/60 mb-5">يرجى إدخال كلمة المرور التي تم إرسالها لرقمك في واتساب.</p>
+                    
+                    <div class="input-group mb-5">
+                        <input type="password" id="sessionPassword" placeholder="كلمة المرور (VIP-...)" class="input-vip text-center font-mono tracking-wider" dir="ltr">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    
+                    <button onclick="unlockSettings()" class="btn-action w-full">
+                        <i class="fa-solid fa-unlock"></i> دخول
+                    </button>
+                </div>
+
+                <!-- لوحة الإعدادات (تظهر بعد فك القفل) -->
+                <div id="settingsPanel" class="hidden space-y-4">
+                    
+                    <!-- أزرار التحكم الرئيسية -->
+                    <div class="glass-card p-5 border-r-4 border-r-rose-500 relative overflow-hidden">
+                        
+                        <!-- زر تشغيل البوت -->
+                        <div class="flex justify-between items-center mb-4 border-b border-rose-500/10 pb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400"><i class="fa-solid fa-power-off"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">تشغيل البوت بالكامل</h3>
+                                    <p class="text-[0.65rem] text-rose-200/50 mt-1">الزر الرئيسي للنظام</p>
+                                </div>
+                            </div>
+                            <input type="checkbox" id="botToggle" class="toggle-switch">
+                        </div>
+
+                        <!-- زر الأوامر -->
+                        <div class="flex justify-between items-center mb-4 border-b border-rose-500/10 pb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-400"><i class="fa-solid fa-code"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">تشغيل الأوامر</h3>
+                                    <p class="text-[0.65rem] text-rose-200/50 mt-1">السماح بتنفيذ الأوامر اليدوية</p>
+                                </div>
+                            </div>
+                            <input type="checkbox" id="cmdToggle" class="toggle-switch">
+                        </div>
+
+                        <!-- 🌟 زر الذكاء الاصطناعي -->
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.3)]"><i class="fa-solid fa-brain"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">الذكاء الاصطناعي (AI)</h3>
+                                    <p class="text-[0.65rem] text-rose-200/50 mt-1">الرد التلقائي كإنسان حقيقي</p>
+                                </div>
+                            </div>
+                            <input type="checkbox" id="aiToggle" class="toggle-switch">
+                        </div>
+
+                        <!-- 🌟 زر الصحين الزرقاء الجديد -->
+                        <div class="flex justify-between items-center mt-4 border-t border-rose-500/10 pt-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]"><i class="fa-solid fa-check-double"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">الصحين الزرقاء</h3>
+                                    <p class="text-[0.65rem] text-rose-200/50 mt-1">قراءة الرسائل تلقائياً</p>
+                                </div>
+                            </div>
+                            <input type="checkbox" id="autoReadToggle" class="toggle-switch">
+                        </div>
+                    </div>
+
+                    <!-- إعدادات التفاعل -->
+                    <div class="glass-card p-5">
+                        <div class="flex justify-between items-center mb-4 border-b border-rose-500/10 pb-4">
+                            <div>
+                                <h3 class="font-bold text-sm text-white">التفاعل التلقائي</h3>
+                                <p class="text-[0.65rem] text-rose-200/50 mt-1">وضع إيموجي على كل رسالة</p>
+                            </div>
+                            <input type="checkbox" id="autoReactToggle" class="toggle-switch">
+                        </div>
+
+                        <div>
+                            <h3 class="font-bold text-sm mb-3 text-rose-100">الإيموجي المفضل</h3>
+                            <div class="flex gap-3">
+                                <input type="text" id="reactEmoji" value="💖" class="input-vip text-center text-3xl p-2 h-14 w-full bg-[rgba(0,0,0,0.5)]" maxlength="2">
+                                <div class="flex gap-2">
+                                    <button onclick="document.getElementById('reactEmoji').value='💖'" class="w-12 h-14 bg-[rgba(0,0,0,0.4)] rounded-xl text-xl active:scale-90 transition border border-rose-500/20 shadow-inner">💖</button>
+                                    <button onclick="document.getElementById('reactEmoji').value='✨'" class="w-12 h-14 bg-[rgba(0,0,0,0.4)] rounded-xl text-xl active:scale-90 transition border border-rose-500/20 shadow-inner">✨</button>
+                                    <button onclick="document.getElementById('reactEmoji').value='👑'" class="w-12 h-14 bg-[rgba(0,0,0,0.4)] rounded-xl text-xl active:scale-90 transition border border-rose-500/20 shadow-inner">👑</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="saveSettings()" class="btn-action btn-purple w-full py-4 text-lg shadow-[0_10px_30px_rgba(217,70,239,0.4)] mt-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> حفظ الإعدادات الفخمة
+                    </button>
+
+                    <!-- منطقة الخطر (حذف الجلسة) -->
+                    <div class="glass-card p-5 border border-red-500/30 mt-8 relative overflow-hidden bg-[rgba(40,10,15,0.7)]">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-red-500/20 rounded-bl-full flex justify-center items-center text-red-400 pl-4 pb-4"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <h3 class="font-black text-red-400 mb-2">منطقة الخطر</h3>
+                        <p class="text-xs text-red-200/50 mb-4">هذا الإجراء سيقوم بحذف الجلسة وتسجيل الخروج من واتساب نهائياً.</p>
+                        
+                        <div class="input-group mb-3">
+                            <input type="password" id="masterPassword" placeholder="كلمة مرور السيرفر" class="input-vip border-red-500/30 text-center bg-[rgba(0,0,0,0.6)]" dir="ltr">
+                            <i class="fa-solid fa-shield-cat text-red-400/50"></i>
+                        </div>
+                        <button onclick="deleteSession()" class="btn-action btn-danger w-full text-sm">
+                            <i class="fa-solid fa-trash-can"></i> حذف الجلسة نهائياً
+                        </button>
+                    </div>
+
+                </div>
+                
+                <div id="noSessionMsg" class="text-center text-rose-300/40 text-sm mt-12 font-bold">
+                    <i class="fa-solid fa-hand-pointer text-4xl mb-3 opacity-30 block"></i>
+                    يرجى اختيار الجلسة أولاً يا أميرة
+                </div>
+            </section>
+
+        </div> 
+
+        <!-- شريط التنقل السفلي -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchPage('page-home')" id="nav-home">
+                <i class="fa-solid fa-house"></i>
+                <span>الرئيسية</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('page-connect')" id="nav-connect">
+                <i class="fa-solid fa-qrcode"></i>
+                <span>الربط</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('page-settings')" id="nav-settings">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>الإعدادات</span>
+            </div>
+        </nav>
+
+    </div>
+
+    <!-- المنطق البرمجي السلس وتأثيرات الطقس -->
+    <script>
+        // ==========================================
+        // 🌸 نظام التأثيرات (المطر والورود)
+        // ==========================================
+        function initWeatherEffects() {
+            const container = document.getElementById('weather-canvas');
+            
+            // 1. إنشاء قطرات المطر المائلة (الرياح)
+            for(let i = 0; i < 40; i++) {
+                let drop = document.createElement('div');
+                drop.className = 'raindrop';
+                // توزيع عشوائي أوسع لتغطية الشاشة رغم ميلان الرياح
+                drop.style.left = (Math.random() * 150 - 25) + 'vw'; 
+                drop.style.animationDuration = (Math.random() * 0.6 + 0.4) + 's'; // سرعة المطر
+                drop.style.animationDelay = (Math.random() * 2) + 's';
+                drop.style.opacity = Math.random() * 0.5 + 0.1;
+                container.appendChild(drop);
+            }
+
+            // 2. إنشاء بتلات الورد المتساقطة
+            for(let i = 0; i < 25; i++) {
+                let petal = document.createElement('div');
+                petal.className = Math.random() > 0.5 ? 'petal dark' : 'petal'; // لونين للبتلات
+                petal.style.left = (Math.random() * 120 - 10) + 'vw';
+                let size = (Math.random() * 12 + 8) + 'px';
+                petal.style.width = size;
+                petal.style.height = size;
+                petal.style.animationDuration = (Math.random() * 4 + 4) + 's'; // سقوط بطيء وناعم
+                petal.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(petal);
+            }
+        }
+        // تشغيل الطقس عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', initWeatherEffects);
+
+        // ==========================================
+        // 💻 منطق لوحة التحكم والتطبيقات
+        // ==========================================
+        let verifiedPassword = '';
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(pageId.replace('page-', 'nav-')).classList.add('active');
+
+            if (pageId === 'page-settings') fetchSessions();
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('i');
+            document.getElementById('toastText').textContent = message;
+            
+            toast.className = `toast-msg show ${type === 'error' ? 'error' : ''}`;
+            icon.className = type === 'error' ? 'fa-solid fa-circle-exclamation text-red-400 text-xl' : 'fa-solid fa-circle-check text-rose-400 text-xl';
+
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        function showLoader() {
+            document.getElementById('displayArea').classList.remove('hidden');
+            document.getElementById('displayArea').style.display = 'flex';
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('codeResult').classList.add('hidden');
+            document.getElementById('qrResult').classList.add('hidden');
+        }
+
+        // 🌟 دالة نسخ الكود بأمان
+        function copyCode() {
+            const codeText = document.getElementById('theCode').textContent;
+            
+            // إنشاء عنصر مؤقت للنسخ (طريقة آمنة جداً وتعمل داخل أي متصفح/إطار)
+            const tempInput = document.createElement("textarea");
+            tempInput.value = codeText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand("copy");
+                showToast('💖 تم نسخ الكود بنجاح!');
+            } catch (err) {
+                showToast('فشل النسخ، يرجى النسخ يدوياً', 'error');
+            }
+            
+            document.body.removeChild(tempInput);
+        }
+
+        async function requestPairCode() {
+            const sessionId = document.getElementById('sessionId').value.trim();
+            const number = document.getElementById('phoneNumber').value.trim();
+            if (!sessionId || !number) return showToast('أكملي البيانات المطلوبة يا أميرة', 'error');
+
+            showLoader();
+            try {
+                const res = await fetch('/pair', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, number })
+                });
+                const data = await res.json();
+                document.getElementById('loading').classList.add('hidden');
+                
+                if (data.pairingCode) {
+                    document.getElementById('theCode').textContent = data.pairingCode;
+                    document.getElementById('codeResult').classList.remove('hidden');
+                    document.getElementById('codeResult').style.display = 'flex';
+                    showToast('تم استخراج الكود! شيكي الواتساب 💖');
+                } else throw new Error(data.error);
+            } catch (err) {
+                document.getElementById('displayArea').classList.add('hidden');
+                showToast(err.message || 'خطأ في الاتصال بالخوادم', 'error');
+            }
+        }
+
+        async function createSessionQR() {
+            const sessionId = document.getElementById('sessionId').value.trim();
+            if (!sessionId) return showToast('أدخلي اسم الجلسة', 'error');
+
+            showLoader();
+            try {
+                const res = await fetch('/create-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId })
+                });
+                const data = await res.json();
+                document.getElementById('loading').classList.add('hidden');
+
+                if (data.qr) {
+                    document.getElementById('theQr').src = data.qr;
+                    document.getElementById('qrResult').classList.remove('hidden');
+                    document.getElementById('qrResult').style.display = 'flex';
+                    showToast('تم توليد الباركود بنجاح 🌸');
+                } else throw new Error(data.error);
+            } catch (err) {
+                document.getElementById('displayArea').classList.add('hidden');
+                showToast(err.message || 'خطأ في الاتصال', 'error');
+            }
+        }
+
+        async function fetchSessions() {
+            try {
+                const res = await fetch('/sessions');
+                const data = await res.json();
+                const select = document.getElementById('activeSessions');
+                const current = select.value;
+                select.innerHTML = '<option value="">-- اختاري الجلسة من هنا --</option>';
+                data.sessions.forEach(s => select.innerHTML += `<option value="${s}">${s}</option>`);
+                if(data.sessions.includes(current)) select.value = current;
+                else showAuthPanel(); 
+            } catch (e) {}
+        }
+
+        function showAuthPanel() {
+            verifiedPassword = ''; 
+            const sessionId = document.getElementById('activeSessions').value;
+            
+            document.getElementById('settingsPanel').classList.add('hidden');
+            document.getElementById('sessionPassword').value = '';
+
+            if (!sessionId) {
+                document.getElementById('authPanel').classList.add('hidden');
+                document.getElementById('noSessionMsg').classList.remove('hidden');
+            } else {
+                document.getElementById('noSessionMsg').classList.add('hidden');
+                document.getElementById('authPanel').classList.remove('hidden');
+            }
+        }
+
+        async function unlockSettings() {
+            const sessionId = document.getElementById('activeSessions').value;
+            const password = document.getElementById('sessionPassword').value.trim();
+
+            if (!password) return showToast('يرجى إدخال كلمة المرور', 'error');
+
+            try {
+                const res = await fetch('/api/settings/get', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, password })
+                });
+                const data = await res.json();
+                
+                if (data.error) throw new Error(data.error);
+
+                verifiedPassword = password;
+
+                document.getElementById('authPanel').classList.add('hidden');
+                document.getElementById('settingsPanel').classList.remove('hidden');
+                
+                // تعبئة البيانات (بما فيها الذكاء الاصطناعي والصحين الزرقاء)
+                document.getElementById('botToggle').checked = data.botEnabled;
+                document.getElementById('cmdToggle').checked = data.commandsEnabled;
+                document.getElementById('aiToggle').checked = data.aiEnabled || false; 
+                document.getElementById('autoReadToggle').checked = data.autoRead || false; // تفعيل الصحين الزرقاء
+                document.getElementById('autoReactToggle').checked = data.autoReact;
+                document.getElementById('reactEmoji').value = data.reactEmoji || '💖';
+
+                showToast('🔓 تم فتح لوحة التحكم يا أميرة');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function saveSettings() {
+            const sessionId = document.getElementById('activeSessions').value;
+            const botEnabled = document.getElementById('botToggle').checked;
+            const commandsEnabled = document.getElementById('cmdToggle').checked;
+            const aiEnabled = document.getElementById('aiToggle').checked; 
+            const autoRead = document.getElementById('autoReadToggle').checked; // حفظ حالة الصحين الزرقاء
+            const autoReact = document.getElementById('autoReactToggle').checked;
+            const reactEmoji = document.getElementById('reactEmoji').value.trim() || '💖';
+
+            try {
+                const res = await fetch('/api/settings/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        sessionId, 
+                        password: verifiedPassword,
+                        botEnabled,
+                        commandsEnabled,
+                        aiEnabled, 
+                        autoRead, // إرسال حالة الصحين للسيرفر
+                        autoReact, 
+                        reactEmoji 
+                    })
+                });
+                const data = await res.json();
+                if (data.success) showToast('✨ تم حفظ التعديلات بنجاح');
+                else throw new Error(data.error);
+            } catch (err) {
+                showToast(err.message || 'فشل الحفظ', 'error');
+            }
+        }
+
+        async function deleteSession() {
+            const sessionId = document.getElementById('activeSessions').value;
+            const password = document.getElementById('masterPassword').value.trim();
+
+            if(!password) return showToast('أدخلي كلمة المرور الرئيسية أولاً', 'error');
+
+            if(confirm('⚠️ هل أنتِ متأكدة من حذف الجلسة نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                try {
+                    const res = await fetch('/delete-session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId, password })
+                    });
+                    const data = await res.json();
+                    
+                    if(data.message) {
+                        showToast('تم الحذف بنجاح 🗑️');
+                        document.getElementById('masterPassword').value = '';
+                        fetchSessions();
+                        showAuthPanel();
+                    } else throw new Error(data.error);
+                } catch(err) {
+                    showToast(err.message || 'خطأ في الحذف', 'error');
+                }
+            }
+        }
+
+        window.onload = fetchSessions;
+    </script>
+</body>
+</html>
